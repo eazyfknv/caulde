@@ -1,6 +1,10 @@
 import requests
 from pathlib import Path
-from config import X_BEARER_TOKEN
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
 
 USERNAME = "cauldesol"  # MUST match your @handle exactly, no @
 

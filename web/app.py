@@ -151,3 +151,17 @@ def stream_live():
                 pass
             time.sleep(0.5)
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+# ... (rest of your app.py code) ...
+
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 SERVER STARTING: Launching Brain...")
+    try:
+        from main import start_brain
+        start_brain()
+        print("✅ BRAIN LAUNCHED SUCCESSFULLY")
+    except Exception as e:
+        print(f"❌ BRAIN FAILED TO START: {e}")
+        # This usually means a file inside main (like twitter_reader)
+        # is still trying to import 'config'.
