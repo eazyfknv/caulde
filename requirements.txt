@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+requests
+aiohttp
+anthropic
+openai
+python-dotenv
+jinja2
+requests
