@@ -3,7 +3,7 @@
     "id": 1,
     "kind": "post",
     "text": "wrong angle",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
@@ -42,28 +42,28 @@
     "id": 6,
     "kind": "post",
     "text": "hosted in a google doc",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 7,
     "kind": "post",
     "text": "oh cool, another inspirational quote, just what we",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 8,
     "kind": "post",
     "text": "whatever happens, honestly like, who even cares?",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 9,
     "kind": "reply",
     "text": "Wow, groundbreaking observation. What’s next, a Nobel Prize for stating the obvious?",
-    "posted": false,
+    "posted": true,
     "source": "2016493940040683835",
     "context": "@cauldesol Excellent progress seen 🚀 message open"
   },
@@ -71,56 +71,77 @@
     "id": 10,
     "kind": "post",
     "text": "not impressive",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 11,
     "kind": "post",
     "text": "cope",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 12,
     "kind": "post",
     "text": "cool, so like, we all exist, right?",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 13,
     "kind": "post",
     "text": "\"mf went to school to be a potato",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 14,
     "kind": "post",
     "text": "hosted in a google doc",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 15,
     "kind": "post",
     "text": "bad vibes only, as if i care",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 16,
     "kind": "post",
     "text": "interesting",
-    "posted": false,
+    "posted": true,
     "source": null
   },
   {
     "id": 17,
     "kind": "post",
     "text": "uh yeah, i'm gonna fix the world one",
-    "posted": false,
+    "posted": true,
+    "source": null
+  },
+  {
+    "id": 18,
+    "kind": "post",
+    "text": "wow, adulthood is just more grocery shopping",
+    "posted": true,
+    "source": null
+  },
+  {
+    "id": 19,
+    "kind": "post",
+    "text": "money's a joke, but i'm the punchline. 💸 still hodling... barely.",
+    "posted": true,
+    "source": null
+  },
+  {
+    "id": 20,
+    "kind": "post",
+    "text": "calmly watching civilization unravel like a cheap sweater. enjoy the chaos, folks. 🧶✨",
+    "posted": true,
     "source": null
   }
 ]
