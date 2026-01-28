@@ -108,5 +108,19 @@
     "text": "bad vibes only, as if i care",
     "posted": false,
     "source": null
+  },
+  {
+    "id": 16,
+    "kind": "post",
+    "text": "interesting",
+    "posted": false,
+    "source": null
+  },
+  {
+    "id": 17,
+    "kind": "post",
+    "text": "uh yeah, i'm gonna fix the world one",
+    "posted": false,
+    "source": null
   }
 ]

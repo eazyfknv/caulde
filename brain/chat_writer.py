@@ -1,8 +1,19 @@
-from openai import OpenAI
 import os
-from config import OPENAI_API_KEY 
+from openai import OpenAI
+from dotenv import load_dotenv
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# 1. Load .env if it exists (for local testing)
+load_dotenv()
+
+# 2. Get the key directly from the environment (Railway or Local)
+api_key = os.getenv("OPENAI_API_KEY")
+
+# 3. Prevent crash if key is missing (helps debug)
+if not api_key:
+    print("CRITICAL ERROR: OPENAI_API_KEY not found in environment!")
+    client = None
+else:
+    client = OpenAI(api_key=api_key)
 
 SYSTEM_PROMPT = ("""
     You are Caulde.
@@ -46,6 +57,9 @@ SYSTEM_PROMPT = ("""
 """)
 
 def chat_reply(history):
+    if not client:
+        return "System Error: Brain disconnected (API Key missing)."
+
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     for m in history:
@@ -58,9 +72,9 @@ def chat_reply(history):
 
     try:
         completion = client.chat.completions.create(
-            model="gpt-4o",  # Using full GPT-4o for better "reasoning" on insults
+            model="gpt-4o",  
             messages=messages,
-            temperature=1.0, # MAX CHAOS. Allows for wilder, less predictable thoughts.
+            temperature=1.0, 
             max_tokens=60,
             presence_penalty=0.6,
             frequency_penalty=0.6
