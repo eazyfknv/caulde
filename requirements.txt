@@ -9,3 +9,4 @@ openai
 python-dotenv
 jinja2
 requests
+requests-oauthlib

@@ -2,18 +2,21 @@ import requests
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+
+# Load .env locally (Railway ignores .env, but this is safe)
 load_dotenv()
 
-TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
+# ===== ENV VARS =====
+X_BEARER_TOKEN = os.getenv("X_BEARER_TOKEN")
 
-USERNAME = "cauldesol"  # MUST match your @handle exactly, no @
-
+USERNAME = "cauldesol"  # must match @handle exactly
 STATE_FILE = Path("shared/last_seen_id.txt")
 
 _user_id = None
 _last_seen_id = None
 
 
+# ===== STATE HELPERS =====
 def load_last_seen():
     if STATE_FILE.exists():
         return STATE_FILE.read_text().strip()
@@ -28,6 +31,7 @@ def save_last_seen(tweet_id: str):
 _last_seen_id = load_last_seen()
 
 
+# ===== MAIN LOGIC =====
 def fetch_new_mentions():
     global _last_seen_id, _user_id
 
@@ -39,18 +43,18 @@ def fetch_new_mentions():
         "Authorization": f"Bearer {X_BEARER_TOKEN}"
     }
 
-    # resolve user id once
+    # Resolve user ID once
     if not _user_id:
         user_url = f"https://api.twitter.com/2/users/by/username/{USERNAME}"
         r = requests.get(user_url, headers=headers)
 
         if r.status_code != 200:
-            print("user lookup failed:", r.status_code, r.text)
+            print("User lookup failed:", r.status_code, r.text)
             return []
 
         _user_id = r.json()["data"]["id"]
 
-    # fetch mentions
+    # Fetch mentions
     mentions_url = f"https://api.twitter.com/2/users/{_user_id}/mentions"
     params = {
         "max_results": 5,
@@ -63,7 +67,7 @@ def fetch_new_mentions():
     r = requests.get(mentions_url, headers=headers, params=params)
 
     if r.status_code != 200:
-        print("mentions fetch failed:", r.status_code, r.text)
+        print("Mentions fetch failed:", r.status_code, r.text)
         return []
 
     data = r.json()
