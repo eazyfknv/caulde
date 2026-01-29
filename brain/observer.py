@@ -9,8 +9,9 @@ from outputs.drafts import add_reply_draft
 from outputs.stream_log import log_stream
 
 # --- CONFIGURATION ---
-OBSERVER_INTERVAL = 20  # Check every 20 seconds
-ACCOUNTS_PER_BATCH = 3  # How many accounts to check per cycle
+# Checks 3 accounts every 20 seconds.
+OBSERVER_INTERVAL = 20  
+ACCOUNTS_PER_BATCH = 3
 
 # Memory to prevent replying to the same tweet twice
 SEEN_TWEETS = set()
@@ -30,9 +31,9 @@ WATCH_ACCOUNTS = [
     "WeatherMonitors"
 ]
 
-def fetch_recent_tweets(username: str):
+def fetch_latest_tweet(username: str):
     """
-    Fetches the last 5 tweets from a user.
+    Fetches ONLY the single most recent tweet.
     """
     headers = {"Authorization": f"Bearer {X_BEARER_TOKEN}"}
 
@@ -45,31 +46,34 @@ def fetch_recent_tweets(username: str):
         if r.status_code != 200:
             if r.status_code == 429:
                 log_stream(f"⚠️ RATE LIMIT HIT (429). Slowing down...")
-            return []
+            return None
 
         user_data = r.json().get("data")
         if not user_data:
-            return []
+            return None
             
         user_id = user_data["id"]
 
-        # 2. Get Tweets
+        # 2. Get Tweets (Min max_results is 5, but we only use index 0)
         r = requests.get(
             f"https://api.twitter.com/2/users/{user_id}/tweets",
             headers=headers,
-            params={"max_results": 5} # Checks the 5 most recent
+            params={"max_results": 5} 
         )
         if r.status_code != 200:
-            return []
+            return None
 
-        return r.json().get("data", [])
+        data = r.json().get("data", [])
+        if data:
+            return data[0] # RETURN ONLY THE NEWEST ONE
+        return None
         
     except Exception as e:
         log_stream(f"⚠️ Observer API Error: {e}")
-        return []
+        return None
 
 def observer_loop():
-    log_stream("👀 OBSERVER: AGGRESSIVE MODE (20s). Deduplication Active.")
+    log_stream("👀 OBSERVER: HIGH VELOCITY MODE (Checking Latest Only).")
 
     while True:
         try:
@@ -77,38 +81,37 @@ def observer_loop():
             targets = random.sample(WATCH_ACCOUNTS, ACCOUNTS_PER_BATCH)
             
             for account in targets:
-                tweets = fetch_recent_tweets(account)
+                tweet = fetch_latest_tweet(account)
 
-                if not tweets:
+                if not tweet:
                     continue
 
-                for tweet in tweets:
-                    t_id = tweet["id"]
-                    t_text = tweet["text"]
+                t_id = tweet["id"]
+                t_text = tweet["text"]
 
-                    # THE FIX: Check if we already saw this specific tweet
-                    if t_id in SEEN_TWEETS:
-                        continue
+                # THE CHECK: Have we seen this specific tweet ID?
+                if t_id in SEEN_TWEETS:
+                    continue
+                
+                # If we are here, it is a BRAND NEW tweet
+                log_stream(f"🚨 FRESH TWEET by @{account}: '{t_text[:30]}...'")
+                
+                intent = generate_post_intent()
+                output = write(
+                    intent=intent,
+                    context_text=t_text
+                )
 
-                    # If new, process it immediately (100% chance)
-                    log_stream(f"🚨 NEW TWEET by @{account}: '{t_text[:30]}...'")
-                    
-                    intent = generate_post_intent()
-                    output = write(
-                        intent=intent,
-                        context_text=t_text
+                if output:
+                    add_reply_draft(
+                        text=output,
+                        reply_to_id=t_id,
+                        context=f"@{account}: {t_text}"
                     )
-
-                    if output:
-                        add_reply_draft(
-                            text=output,
-                            reply_to_id=t_id,
-                            context=f"@{account}: {t_text}"
-                        )
-                        log_stream(f"✅ DRAFTED REPLY to @{account}")
-                    
-                    # Mark as seen so we don't spam it next loop
-                    SEEN_TWEETS.add(t_id)
+                    log_stream(f"✅ DRAFTED REPLY to @{account}")
+                
+                # Mark seen immediately
+                SEEN_TWEETS.add(t_id)
 
             # Sleep 20s
             time.sleep(OBSERVER_INTERVAL)

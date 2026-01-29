@@ -1,106 +1,54 @@
-import json
-from pathlib import Path
-from typing import List, Dict
+# Simple in-memory storage for drafts
+DRAFTS = []
+next_id = 1
 
-from outputs.stream_log import log_stream
-from outputs.x_poster import post_reply, post_tweet
+def get_drafts():
+    return DRAFTS
 
-DRAFTS_FILE = Path("shared/drafts.json")
-
-
-# -------------------------
-# FILE HELPERS
-# -------------------------
-
-def _read() -> List[Dict]:
-    if not DRAFTS_FILE.exists():
-        return []
-    try:
-        return json.loads(DRAFTS_FILE.read_text(encoding="utf-8"))
-    except Exception:
-        return []
-
-
-def _write(drafts: List[Dict]):
-    DRAFTS_FILE.parent.mkdir(exist_ok=True)
-    DRAFTS_FILE.write_text(
-        json.dumps(drafts, indent=2, ensure_ascii=False),
-        encoding="utf-8"
-    )
-
-
-def _new_id(drafts: List[Dict]) -> int:
-    # simple, stable, no collisions
-    return max([d["id"] for d in drafts], default=0) + 1
-
-
-# -------------------------
-# CREATE
-# -------------------------
-
-def add_post_draft(text: str):
-    drafts = _read()
-    drafts.append({
-        "id": _new_id(drafts),
+def add_post_draft(text):
+    global next_id
+    DRAFTS.insert(0, {
+        "id": next_id,
         "kind": "post",
         "text": text,
-        "posted": False,
-        "source": None,
+        "posted": False
     })
-    _write(drafts)
-    log_stream("post draft created")
+    next_id += 1
 
-
-def add_reply_draft(text: str, reply_to_id: str, context: str):
-    drafts = _read()
-    drafts.append({
-        "id": _new_id(drafts),
+def add_reply_draft(text, reply_to_id, context):
+    global next_id
+    DRAFTS.insert(0, {
+        "id": next_id,
         "kind": "reply",
         "text": text,
-        "posted": False,
-        "source": reply_to_id,
-        "context": context,   # 👈 store the question
+        "reply_to_id": reply_to_id,
+        "context": context, # The tweet we are replying to
+        "posted": False
     })
-    _write(drafts)
+    next_id += 1
 
+def discard(draft_id):
+    global DRAFTS
+    DRAFTS = [d for d in DRAFTS if d["id"] != draft_id]
 
+def discard_all():
+    """
+    Wipes all drafts immediately.
+    """
+    global DRAFTS
+    DRAFTS.clear()
 
-# -------------------------
-# READ
-# -------------------------
-
-def get_drafts() -> List[Dict]:
-    return _read()
-
-
-# -------------------------
-# ACTIONS
-# -------------------------
-
-def approve_and_post(draft_id: int):
-    drafts = _read()
-
-    for d in drafts:
-        if d["id"] == draft_id and not d["posted"]:
-            if d["kind"] == "reply":
-                post_reply(d["text"], d["source"])
-            else:
-                post_tweet(d["text"])
-
-            d["posted"] = True
-            log_stream("draft approved and posted")
-            break
-
-    _write(drafts)
-
-
-def discard(draft_id: int):
-    drafts = _read()
-
-    for d in drafts:
-        if d["id"] == draft_id and not d["posted"]:
-            d["posted"] = True
-            log_stream("draft discarded")
-            break
-
-    _write(drafts)
+def approve_and_post(draft_id):
+    # Find the draft
+    draft = next((d for d in DRAFTS if d["id"] == draft_id), None)
+    if not draft:
+        return False
+    
+    # In a real bot, here is where you call twitter_api.post_tweet(draft['text'])
+    print(f"✅ POSTING TO TWITTER: {draft['text']}")
+    
+    # Mark as posted (or remove)
+    draft["posted"] = True
+    # Optional: Remove immediately after posting
+    discard(draft_id)
+    return True

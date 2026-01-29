@@ -20,16 +20,27 @@
     }
     button {
       margin-right: 8px;
+      cursor: pointer;
     }
-    .disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    .btn-red {
+        background-color: #3f0000;
+        color: #ffcccc;
+        border: 1px solid #770000;
+        padding: 5px 10px;
+        float: right;
+    }
+    .btn-red:hover {
+        background-color: #770000;
+        color: white;
     }
   </style>
 </head>
 <body>
 
-<h2>caulde drafts</h2>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>caulde drafts</h2>
+    <button onclick="clearAll()" class="btn-red">CLEAR ALL</button>
+</div>
 
 <button id="btn-random" onclick="generatePost()">generate dumb post</button>
 <br/><br/>
@@ -40,7 +51,6 @@
 <button id="btn-prompt" onclick="sendPrompt()">generate post</button>
 
 <br/><br/>
-
 
 <div id="drafts">loading...</div>
 
@@ -59,25 +69,15 @@ async function loadDrafts() {
 
   drafts.forEach(d => {
     if (d.posted) return;
-
     const div = document.createElement("div");
     div.className = "draft";
-
     div.innerHTML = `
-  <div class="meta">${d.kind}</div>
-
-  ${d.kind === "reply" && d.context ? `
-    <div style="color:#888; font-size:12px; margin-bottom:6px;">
-      ↳ ${d.context}
-    </div>
-  ` : ""}
-
-  <div>${d.text}</div><br/>
-  <button onclick="approve(${d.id})">YES</button>
-  <button onclick="discardDraft(${d.id})">NO</button>
-`;
-
-
+      <div class="meta">${d.kind}</div>
+      ${d.kind === "reply" && d.context ? `<div style="color:#888; font-size:12px; margin-bottom:6px;">↳ ${d.context}</div>` : ""}
+      <div>${d.text}</div><br/>
+      <button onclick="approve(${d.id})">YES</button>
+      <button onclick="discardDraft(${d.id})">NO</button>
+    `;
     container.appendChild(div);
   });
 }
@@ -90,6 +90,13 @@ async function approve(id) {
 async function discardDraft(id) {
   await fetch(`/discard/${id}`, { method: "POST" });
   loadDrafts();
+}
+
+// --- NEW FUNCTION ---
+async function clearAll() {
+    if(!confirm("DELETE ALL DRAFTS?")) return;
+    await fetch("/discard_all", { method: "POST" });
+    loadDrafts();
 }
 
 async function generatePost() {
@@ -115,10 +122,8 @@ async function sendPrompt() {
   
   if (!text) return;
 
-  // LOCK
   btn.disabled = true;
-  btn.innerText = "GENERATING...";
-  btn.style.cursor = "wait";
+  btn.innerText = "generating...";
   
   try {
     await fetch("/prompt", {
@@ -131,14 +136,11 @@ async function sendPrompt() {
   } catch (e) {
     alert("Error sending prompt");
   } finally {
-    // UNLOCK
     btn.disabled = false;
     btn.innerText = "generate post";
-    btn.style.cursor = "pointer";
   }
 }
 
-// Initial Load
 loadDrafts();
 setInterval(loadDrafts, 5000);
 </script>
