@@ -64,6 +64,7 @@ WATCH_ACCOUNTS = [
     "CryptoZin",
     "dxrnell",
     "litteralyme0",
+    "novabyyte",
     "WeatherMonitors"
     ]
 

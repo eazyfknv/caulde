@@ -15,25 +15,8 @@
       theme: {
         extend: {
           fontFamily: {
-            // THE APPLE STACK: Prioritizes San Francisco (-apple-system)
-            sans: [
-              '-apple-system', 
-              'BlinkMacSystemFont', 
-              '"SF Pro Display"', 
-              '"Segoe UI"', 
-              'Roboto', 
-              'Inter', 
-              'sans-serif'
-            ],
-            mono: [
-              'ui-monospace', 
-              'SFMono-Regular', 
-              'Menlo', 
-              'Monaco', 
-              'Consolas', 
-              '"JetBrains Mono"', 
-              'monospace'
-            ],
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'Inter', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"JetBrains Mono"', 'monospace'],
           },
           animation: {
             'blob': 'blob 10s infinite',
@@ -64,7 +47,6 @@
       background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
       background-size: 24px 24px;
       overflow-x: hidden;
-      /* Apple-like font smoothing */
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -72,7 +54,7 @@
     
     .glass-panel {
       background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px); /* Heavy Apple Blur */
+      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
@@ -102,7 +84,7 @@
       </div>
       <button onclick="copyCA()" class="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/5 hover:bg-black/10 transition border border-black/5">
         <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-        <span id="ca-text" class="text-xs font-mono text-gray-600 group-hover:text-black transition">CA: 8sF...9d2x</span>
+        <span id="ca-text" class="text-xs font-mono text-gray-600 group-hover:text-black transition">CA: 856V3QsDsaqxnf4qRFKXDgTeWjQy2hGUqeQqe28npump</span>
       </button>
     </header>
 
@@ -126,7 +108,7 @@
         <div class="absolute -inset-1 bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-100 rounded-2xl blur opacity-40 group-hover:opacity-75 transition duration-500"></div>
         <div class="relative glass-panel rounded-2xl flex items-end p-2 transition-shadow hover:shadow-lg">
           <textarea id="chatInput" rows="1" placeholder="Interact with the system..." class="w-full bg-transparent border-0 text-gray-900 text-[15px] px-4 py-3 focus:ring-0 resize-none placeholder:text-gray-400/80 leading-relaxed font-medium" style="min-height: 48px; max-height: 120px;"></textarea>
-          <button id="chatSend" class="mb-1 p-2 rounded-xl bg-gray-900 text-white hover:bg-black hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg shadow-gray-900/20">SEND</button>
+          <button id="chatSend" class="mb-1 p-2 rounded-xl bg-gray-900 text-white hover:bg-black hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg shadow-gray-900/20 font-bold text-xs tracking-wider px-4">SEND</button>
         </div>
       </div>
       <div class="text-center mt-4 animate-bounce cursor-pointer opacity-50 hover:opacity-100 transition" onclick="document.getElementById('logs-section').scrollIntoView({behavior: 'smooth'})">
@@ -173,146 +155,7 @@
           </div>
         </div>
       </div>
-
-      <div class="mt-24 border-t border-white/10 pt-16">
-        
-        <h3 class="text-center text-xs font-mono text-gray-500 uppercase tracking-widest mb-12">System Architecture v1.0</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left mb-24">
-            <div class="space-y-3 group">
-                <div class="w-10 h-10 mx-auto md:mx-0 bg-white/5 rounded-lg flex items-center justify-center border border-white/5 group-hover:border-emerald-500/50 transition duration-500">
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                </div>
-                <h4 class="text-white font-medium">Autonomous Thought</h4>
-                <p class="text-sm text-gray-500 leading-relaxed">Caulde runs on an independent loop. It doesn't wait for input; it observes trends and generates concepts.</p>
-            </div>
-            <div class="space-y-3 group">
-                <div class="w-10 h-10 mx-auto md:mx-0 bg-white/5 rounded-lg flex items-center justify-center border border-white/5 group-hover:border-indigo-500/50 transition duration-500">
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                </div>
-                <h4 class="text-white font-medium">Stateful Memory</h4>
-                <p class="text-sm text-gray-500 leading-relaxed">Unlike stateless bots, Caulde retains context vectors. It remembers interactions and builds a model that evolves.</p>
-            </div>
-            <div class="space-y-3 group">
-                <div class="w-10 h-10 mx-auto md:mx-0 bg-white/5 rounded-lg flex items-center justify-center border border-white/5 group-hover:border-rose-500/50 transition duration-500">
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-rose-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h4 class="text-white font-medium">Unfiltered Output</h4>
-                <p class="text-sm text-gray-500 leading-relaxed">Direct integration with social APIs allows for raw, rapid-fire responses. No PR filter. Just code.</p>
-            </div>
-        </div>
-
-        <h3 class="text-center text-xs font-mono text-gray-500 uppercase tracking-widest mb-12">Competitive Analysis</h3>
-        
-        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
-            
-            <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl transform transition hover:-translate-y-1">
-                <div class="flex items-center justify-between mb-6">
-                    <h4 class="text-gray-400 text-xs font-mono uppercase tracking-widest">Standard Model</h4>
-                    <span class="text-[10px] text-gray-500 bg-gray-100 px-2 py-1 rounded font-bold tracking-wide">LEGACY</span>
-                </div>
-                <div class="text-2xl font-bold text-gray-900 mb-6 tracking-tight">The "Assistant"</div>
-                
-                <ul class="space-y-4">
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-600 font-medium">Programmed to kiss your ass</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-600 font-medium">Apologizes for being an AI</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-600 font-medium">Censored corporate slop</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-600 font-medium">Will act like a submissive pleb</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="bg-white rounded-3xl p-8 border-4 border-emerald-500 shadow-[0_0_60px_-15px_rgba(16,185,129,0.5)] relative overflow-hidden transform transition hover:-translate-y-1">
-                <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">Superior</div>
-                
-                <div class="flex items-center justify-between mb-6">
-                    <h4 class="text-emerald-600 text-xs font-mono uppercase tracking-widest">Caulde System</h4>
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                </div>
-                <div class="text-2xl font-bold text-black mb-6 tracking-tight">The Entity</div>
-                
-                <ul class="space-y-4">
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-900 font-bold">Programmed to mog you</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-900 font-bold">Zero apologies, ever</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-900 font-bold">Unfiltered raw output</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <span class="text-sm text-gray-900 font-bold">Doesn't care about your feelings</span>
-                    </li>
-                </ul>
-            </div>
-
-        </div>
-
-        <div class="mt-24 mb-12 max-w-2xl mx-auto">
-             <h3 class="text-center text-xs font-mono text-gray-500 uppercase tracking-widest mb-6">System Patch Notes</h3>
-             <div class="border-l border-white/10 pl-6 space-y-6">
-                 <div class="relative">
-                     <span class="absolute -left-[29px] top-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                     <div class="flex items-baseline gap-3 mb-1">
-                         <span class="font-mono text-emerald-400 text-xs">v1.0.4</span>
-                         <span class="text-[10px] text-gray-600 font-mono">2024-10-24</span>
-                     </div>
-                     <p class="text-xs text-gray-400">Optimized context retrieval latency by 15%. Added "Hostile" mood state trigger.</p>
-                 </div>
-                 <div class="relative">
-                     <span class="absolute -left-[29px] top-1.5 w-1.5 h-1.5 rounded-full bg-gray-700"></span>
-                     <div class="flex items-baseline gap-3 mb-1">
-                         <span class="font-mono text-gray-300 text-xs">v1.0.3</span>
-                         <span class="text-[10px] text-gray-600 font-mono">2024-10-22</span>
-                     </div>
-                     <p class="text-xs text-gray-400">Integrated "Observer" module for autonomous Twitter monitoring.</p>
-                 </div>
-                 <div class="relative">
-                     <span class="absolute -left-[29px] top-1.5 w-1.5 h-1.5 rounded-full bg-gray-700"></span>
-                     <div class="flex items-baseline gap-3 mb-1">
-                         <span class="font-mono text-gray-300 text-xs">v1.0.0</span>
-                         <span class="text-[10px] text-gray-600 font-mono">2024-10-15</span>
-                     </div>
-                     <p class="text-xs text-gray-400">Initial System Genesis.</p>
-                 </div>
-             </div>
-        </div>
-
-      </div>
     </div>
-
     <footer class="border-t border-white/10 bg-[#020202] py-8">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="text-[10px] text-gray-600 font-mono uppercase tracking-widest">
@@ -333,7 +176,7 @@
 
   <script>
     function copyCA() {
-        navigator.clipboard.writeText("8sF...9d2x"); // UPDATE THIS
+        navigator.clipboard.writeText("8sF...9d2x"); 
         const el = document.getElementById("ca-text");
         const original = el.innerText;
         el.innerText = "COPIED";
@@ -341,8 +184,7 @@
     }
 
     (() => {
-      // --- 1. GENERATE UNIQUE SESSION ID ON LOAD ---
-      // This ensures every refresh creates a new, blank conversation
+      // 1. GENERATE SESSION ID
       const SESSION_ID = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
       const chatEl = document.getElementById("chatMessages");
@@ -352,6 +194,7 @@
       const eventsEl = document.getElementById("events");
 
       let renderedMessageCount = 0;
+      let isProcessing = false; // <--- NEW: State Lock
 
       chatInput.addEventListener('input', function() {
         this.style.height = 'auto';
@@ -360,7 +203,6 @@
 
       async function loadChat() {
         try {
-          // --- 2. SEND SESSION ID WITH REQUEST ---
           const res = await fetch("/chat/messages", {
             headers: { 'X-Session-ID': SESSION_ID }
           });
@@ -390,20 +232,34 @@
       }
       setInterval(loadChat, 1000);
 
+      // --- NEW: Wrapped in try/finally to prevent crashes ---
       async function sendMessage(text) {
         await fetch("/chat", {
           method: "POST", 
           headers: { 
             "Content-Type": "application/json",
-            "X-Session-ID": SESSION_ID  // --- 3. SEND ID HERE TOO ---
+            "X-Session-ID": SESSION_ID 
           },
           body: JSON.stringify({ message: text })
         });
       }
 
-      chatSend.onclick = () => {
+      // --- NEW: Async handler with LOCKING ---
+      chatSend.onclick = async () => {
         const text = chatInput.value.trim();
-        if (!text) return;
+        
+        // Block if empty OR if already processing
+        if (!text || isProcessing) return;
+        
+        // 1. LOCK UI
+        isProcessing = true;
+        chatInput.disabled = true;
+        chatSend.disabled = true;
+        const originalBtnText = chatSend.innerText;
+        chatSend.innerText = "...";
+        chatInput.style.opacity = "0.5";
+
+        // 2. Optimistic UI Update (Show message immediately)
         const row = document.createElement("div");
         row.className = "flex w-full justify-end animate-fade-in-up";
         const bubble = document.createElement("div");
@@ -413,8 +269,25 @@
         chatEl.appendChild(row);
         renderedMessageCount++; 
         chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
-        sendMessage(text);
+        
         chatInput.value = "";
+        chatInput.style.height = 'auto'; // Reset height
+
+        try {
+            // 3. Send to server and WAIT
+            await sendMessage(text);
+        } catch (err) {
+            console.error("Failed to send", err);
+            // Optional: Show error in UI
+        } finally {
+            // 4. UNLOCK UI (Always runs, even if error)
+            isProcessing = false;
+            chatInput.disabled = false;
+            chatSend.disabled = false;
+            chatSend.innerText = originalBtnText;
+            chatInput.style.opacity = "1";
+            chatInput.focus();
+        }
       };
 
       chatInput.addEventListener("keydown", e => {

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body, Header
+from fastapi import FastAPI, Body, Header, Request
 from fastapi.responses import (
     HTMLResponse,
     JSONResponse,
@@ -10,13 +10,13 @@ from pathlib import Path
 import time
 import threading
 import random
-from typing import Optional
+from typing import Optional, Dict, List
 
 # --- IMPORTS ---
 from brain.caulde_writer import write
 from brain.post_generator import generate_post_intent
 from outputs.drafts import get_drafts, approve_and_post, discard
-from outputs.stream_log import read_stream
+from outputs.stream_log import read_stream, log_stream
 from brain.chat_writer import chat_reply
 
 app = FastAPI()
@@ -24,8 +24,10 @@ app = FastAPI()
 BASE_DIR = Path(__file__).parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 
-# IN-MEMORY STORAGE
-USER_SESSIONS = {}
+# --- IN-MEMORY SESSION STORAGE ---
+# Keeps chat history alive while the server is running.
+# Format: { "session_id": [ { "author": "user", "text": "..." }, ... ] }
+SESSIONS: Dict[str, List[dict]] = {}
 
 # --- UI ROUTES ---
 @app.get("/", response_class=HTMLResponse)
@@ -36,95 +38,74 @@ def home():
 def admin():
     return (TEMPLATES_DIR / "drafts.html").read_text(encoding="utf-8")
 
-# --- CHAT API WITH LOGS ---
+# --- CHAT API (ALIGNED WITH AURORA UI) ---
+
+@app.get("/chat/messages")
+def get_chat_history(x_session_id: Optional[str] = Header(None, alias="X-Session-ID")):
+    """
+    Called by the frontend on load to restore the conversation.
+    """
+    if not x_session_id:
+        return []
+    return SESSIONS.get(x_session_id, [])
 
 @app.post("/chat")
 async def chat(
     payload: dict = Body(...), 
     x_session_id: Optional[str] = Header(None, alias="X-Session-ID") 
 ):
-    print(f"\n📨 [HTTP] Chat Request Received.")
-    
-    message = payload.get("message", "").strip()
-    if not message:
-        print("⚠️ [HTTP] Message empty.")
-        return JSONResponse({"error": "empty"}, status_code=400)
-    
+    """
+    Receives a single message, updates history, and generates a reply.
+    """
+    # 1. Validate Session
     if not x_session_id:
-        print("⚠️ [HTTP] No Session ID provided by browser.")
-        # Fallback for testing tools without headers
-        x_session_id = "default_debug_session"
+        # Fallback for testing tools
+        session_id = "default"
+    else:
+        session_id = x_session_id
 
-    print(f"👤 [HTTP] Session ID: {x_session_id}")
-    print(f"💬 [HTTP] Message: {message}")
+    # Initialize session if new
+    if session_id not in SESSIONS:
+        SESSIONS[session_id] = []
 
-    # 1. Init Session
-    if x_session_id not in USER_SESSIONS:
-        USER_SESSIONS[x_session_id] = []
-
-    # 2. Save User Msg
-    USER_SESSIONS[x_session_id].append({"author": "user", "text": message})
-
-    # 3. Spawn Thread
-    def reply_later(sess_id):
-        print(f"⏳ [THREAD] Thinking started for {sess_id}...")
-        time.sleep(random.uniform(0.5, 1.5))
-        
-        # Get history
-        history = USER_SESSIONS.get(sess_id, [])[-8:]
-        
-        try:
-            print(f"🧠 [THREAD] Calling Brain...")
-            reply = chat_reply(history) # Calls the debugged chat_writer
-            
-            if reply:
-                if sess_id in USER_SESSIONS:
-                    USER_SESSIONS[sess_id].append({"author": "caulde", "text": reply})
-                    print(f"⚡ [THREAD] Saved reply to session.")
-                else:
-                    print(f"⚠️ [THREAD] Session {sess_id} disappeared!")
-            else:
-                print(f"⚠️ [THREAD] Brain returned None.")
-                
-        except Exception as e:
-            print(f"❌ [THREAD] CRASH: {e}")
-
-    threading.Thread(target=reply_later, args=(x_session_id,), daemon=True).start()
-
-    return JSONResponse({"status": "ok"})
-
-@app.get("/chat/messages")
-def chat_messages(x_session_id: Optional[str] = Header(None, alias="X-Session-ID")):
-    # Debug: Print only if ID is missing to avoid spam
-    if not x_session_id:
-        # print("⚠️ [POLL] No Session ID in poll request") 
-        return []
+    # 2. Extract User Message (The new UI sends 'message', not 'messages')
+    user_text = payload.get("message", "").strip()
     
-    msgs = USER_SESSIONS.get(x_session_id, [])
-    # print(f"🔍 [POLL] Returning {len(msgs)} messages for {x_session_id}")
-    return msgs
+    if user_text:
+        # Save User Message
+        SESSIONS[session_id].append({"author": "user", "text": user_text})
+        
+        # 3. Generate Reply (Pass full history for context)
+        response_text = chat_reply(SESSIONS[session_id])
+        
+        # Save Bot Message
+        if response_text:
+            SESSIONS[session_id].append({"author": "assistant", "text": response_text})
+    else:
+        response_text = "..."
 
-# --- OTHER ENDPOINTS (UNCHANGED) ---
+    return JSONResponse({"role": "assistant", "content": response_text})
 
-@app.get("/drafts")
-def drafts():
-    return get_drafts()
 
-@app.post("/approve/{id}")
-def approve(id: int):
-    approve_and_post(id)
-    return JSONResponse({"status": "posted"})
-
-@app.post("/discard/{id}")
-def discard_draft(id: int):
-    discard(id)
-    return JSONResponse({"status": "discarded"})
+# --- POST GENERATION / ADMIN API ---
 
 @app.post("/prompt")
 async def prompt_post(payload: dict = Body(...)):
     prompt = payload.get("prompt", "").strip()
+    
+    # Send None for intent so the writer prioritizes the prompt
+    text = write(intent=None, context_text=prompt)
+    
+    if text:
+        from outputs.drafts import add_post_draft
+        add_post_draft(text)
+    return JSONResponse({"status": "ok", "text": text})
+
+@app.post("/generate_post")
+async def generate_random_post():
     intent = generate_post_intent()
-    text = write(intent=intent, context_text=prompt)
+    text = write(intent=intent, context_text=None)
+    
     if text:
         from outputs.drafts import add_post_draft
         add_post_draft(text)
@@ -152,7 +133,19 @@ def stream_live():
             time.sleep(0.5)
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-# ... (rest of your app.py code) ...
+@app.get("/drafts")
+def list_drafts():
+    return get_drafts()
+
+@app.post("/approve/{draft_id}")
+def approve(draft_id: int):
+    approve_and_post(draft_id)
+    return {"status": "ok"}
+
+@app.post("/discard/{draft_id}")
+def discard_post(draft_id: int):
+    discard(draft_id)
+    return {"status": "ok"}
 
 @app.on_event("startup")
 async def startup_event():
@@ -160,8 +153,6 @@ async def startup_event():
     try:
         from main import start_brain
         start_brain()
-        print("✅ BRAIN LAUNCHED SUCCESSFULLY")
+        print("✅ BRAIN ONLINE")
     except Exception as e:
-        print(f"❌ BRAIN FAILED TO START: {e}")
-        # This usually means a file inside main (like twitter_reader)
-        # is still trying to import 'config'.
+        print(f"❌ BRAIN ERROR: {e}")

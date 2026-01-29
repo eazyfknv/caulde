@@ -21,19 +21,23 @@
     button {
       margin-right: 8px;
     }
+    .disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
 
 <h2>caulde drafts</h2>
 
-<button onclick="generatePost()">generate dumb post</button>
+<button id="btn-random" onclick="generatePost()">generate dumb post</button>
 <br/><br/>
 
 <textarea id="promptBox" rows="3" style="width:100%; margin-bottom:8px;"
   placeholder="type a vibe, thought, or instruction…"></textarea>
 
-<button onclick="sendPrompt()">generate post</button>
+<button id="btn-prompt" onclick="sendPrompt()">generate post</button>
 
 <br/><br/>
 
@@ -89,30 +93,55 @@ async function discardDraft(id) {
 }
 
 async function generatePost() {
-  await fetch("/generate_post", { method: "POST" });
-  loadDrafts();
+  const btn = document.getElementById("btn-random");
+  btn.innerText = "generating...";
+  btn.disabled = true;
+
+  try {
+      await fetch("/generate_post", { method: "POST" });
+      loadDrafts();
+  } catch (e) {
+      alert("Error");
+  } finally {
+      btn.innerText = "generate dumb post";
+      btn.disabled = false;
+  }
 }
 
-loadDrafts();
-setInterval(loadDrafts, 4000);
-</script>
-
-<script>
 async function sendPrompt() {
-  const prompt = document.getElementById("promptBox").value;
-  if (!prompt.trim()) return;
+  const box = document.getElementById("promptBox");
+  const btn = document.getElementById("btn-prompt");
+  const text = box.value.trim();
+  
+  if (!text) return;
 
-  await fetch("/prompt", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt })
-  });
-
-  document.getElementById("promptBox").value = "";
-  loadDrafts();
+  // LOCK
+  btn.disabled = true;
+  btn.innerText = "GENERATING...";
+  btn.style.cursor = "wait";
+  
+  try {
+    await fetch("/prompt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: text })
+    });
+    box.value = ""; 
+    loadDrafts(); 
+  } catch (e) {
+    alert("Error sending prompt");
+  } finally {
+    // UNLOCK
+    btn.disabled = false;
+    btn.innerText = "generate post";
+    btn.style.cursor = "pointer";
+  }
 }
-</script>
 
+// Initial Load
+loadDrafts();
+setInterval(loadDrafts, 5000);
+</script>
 
 </body>
 </html>
