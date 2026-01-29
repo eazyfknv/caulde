@@ -9,9 +9,11 @@ from outputs.drafts import add_reply_draft
 from outputs.stream_log import log_stream
 
 # --- CONFIGURATION ---
-# AGGRESSIVE MODE: Checks 3 random accounts every 20 seconds.
-OBSERVER_INTERVAL = 20  
-ACCOUNTS_PER_BATCH = 3
+OBSERVER_INTERVAL = 20  # Check every 20 seconds
+ACCOUNTS_PER_BATCH = 3  # How many accounts to check per cycle
+
+# Memory to prevent replying to the same tweet twice
+SEEN_TWEETS = set()
 
 WATCH_ACCOUNTS = [
     "cz_binance", "elonmusk", "VitalikButerin", "balajis", "coinbase",
@@ -41,7 +43,6 @@ def fetch_recent_tweets(username: str):
             headers=headers
         )
         if r.status_code != 200:
-            # If 429, we are being rate limited.
             if r.status_code == 429:
                 log_stream(f"⚠️ RATE LIMIT HIT (429). Slowing down...")
             return []
@@ -56,7 +57,7 @@ def fetch_recent_tweets(username: str):
         r = requests.get(
             f"https://api.twitter.com/2/users/{user_id}/tweets",
             headers=headers,
-            params={"max_results": 5}
+            params={"max_results": 5} # Checks the 5 most recent
         )
         if r.status_code != 200:
             return []
@@ -68,7 +69,7 @@ def fetch_recent_tweets(username: str):
         return []
 
 def observer_loop():
-    log_stream("👀 OBSERVER: AGGRESSIVE MODE (20s Interval)")
+    log_stream("👀 OBSERVER: AGGRESSIVE MODE (20s). Deduplication Active.")
 
     while True:
         try:
@@ -81,29 +82,35 @@ def observer_loop():
                 if not tweets:
                     continue
 
-                # Pick one tweet
-                tweet = random.choice(tweets)
-                
-                # REMOVED PROBABILITY CHECK - ALWAYS DRAFTS
-                log_stream(f"🚨 FOUND TWEET by @{account}: '{tweet['text'][:30]}...'")
-                
-                intent = generate_post_intent()
-                
-                # Generate reply
-                output = write(
-                    intent=intent,
-                    context_text=tweet["text"] # Feed the tweet content to the Brain
-                )
+                for tweet in tweets:
+                    t_id = tweet["id"]
+                    t_text = tweet["text"]
 
-                if output:
-                    add_reply_draft(
-                        text=output,
-                        reply_to_id=tweet["id"],
-                        context=f"@{account}: {tweet['text']}"
+                    # THE FIX: Check if we already saw this specific tweet
+                    if t_id in SEEN_TWEETS:
+                        continue
+
+                    # If new, process it immediately (100% chance)
+                    log_stream(f"🚨 NEW TWEET by @{account}: '{t_text[:30]}...'")
+                    
+                    intent = generate_post_intent()
+                    output = write(
+                        intent=intent,
+                        context_text=t_text
                     )
-                    log_stream(f"✅ DRAFTED REPLY to @{account}")
 
-            # Short sleep
+                    if output:
+                        add_reply_draft(
+                            text=output,
+                            reply_to_id=t_id,
+                            context=f"@{account}: {t_text}"
+                        )
+                        log_stream(f"✅ DRAFTED REPLY to @{account}")
+                    
+                    # Mark as seen so we don't spam it next loop
+                    SEEN_TWEETS.add(t_id)
+
+            # Sleep 20s
             time.sleep(OBSERVER_INTERVAL)
 
         except Exception as e:
